@@ -65,14 +65,15 @@ def main():
 
     pretime = time.time()
     while True:
-        canvas.update()
         ret, frame = capture.read()
-        print(detector.findFinger(frame))
+        hands = detector.findFinger(frame)
+        for p, hand in hands:
+            cv2.circle(frame, hand[0].astype(int), 10,  (255, 255, 255), 2)
+        canvas.update(hands)
 
         lh,lv,ls,uh,uv,us = webcam_win.getAllTrackbarPos()
-        proj = replace_background(frame, canvas.canvas,lh,lv,ls,uh,uv,us)
         cv2.imshow('feild', canvas.canvas)
-        cv2.imshow('webcam', proj)
+        cv2.imshow('webcam', replace_background(frame, canvas.canvas,lh,lv,ls,uh,uv,us))
         cv2.imshow('hand', detector.drawHand(frame))
 
         pretime = time.time()

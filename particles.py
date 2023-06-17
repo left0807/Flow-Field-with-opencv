@@ -23,9 +23,17 @@ class Particles():
         self.maxspeed = maxspeed
         self.color = star_colors[int(random()*len(star_colors))][::-1]
 
-    def update(self, force):
-        self.vel = (self.vel + force)*self.maxspeed
-        #self.vel = self.vel/math.sqrt(self.vel[0]**2+self.vel[1]**2)*self.maxspeed
+    def update(self, force, canvas = None, hands = None, attractiveForceMag = None):   
+        if not hands: 
+            self.vel = (self.vel + force)*self.maxspeed
+
+        for hand, handpos in hands:
+            handpos = np.multiply(handpos, [self.width, self.height])
+            v = handpos - self.pos
+            v = v/(v**2).sum()**0.5
+            self.vel = hand*attractiveForceMag*v
+            cv2.circle(canvas, handpos.astype(int), 10,  (255, 255, 255), 2)
+
         self.pos += self.vel
     
     def show(self, canvas):

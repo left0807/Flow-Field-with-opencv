@@ -18,6 +18,7 @@ class flowFeild():
         self.zoff = 0
         self.numParticles = 3000
         self.feildStrengthForce = 0.4
+        self.attractiveForceMag = 10
         self.maxspeed = 5/(5+0.4)
         self.field = []
         self.particlesList = []
@@ -73,7 +74,7 @@ class flowFeild():
 
         cv2.line(self.canvas, pt1.astype(int), pt2.astype(int), (255,255,255), 1)
 
-    def update(self):
+    def update(self, hands = None):
         self.canvas = cv2.addWeighted(self.canvas, 0.8, self.background, 1, 0)
         
         xoff = 1
@@ -92,7 +93,7 @@ class flowFeild():
             x, y = particle.pos
             x = int(x/self.scl)
             y = int(y/self.scl)
-            particle.update(self.field[x+y*self.col])
+            particle.update(self.field[x+y*self.col], canvas = self.canvas, hands = hands, attractiveForceMag = self.attractiveForceMag)
             particle.show(self.canvas)
 
 
