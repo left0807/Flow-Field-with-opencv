@@ -2,12 +2,15 @@ import cv2
 import numpy as np
 import sketch
 import cv2Window
+import mphand
+import time
 
 width = 720
 height = 1280
 
 capture = cv2.VideoCapture(0)
 canvas = sketch.flowFeild(capture.read()[1].shape[0], capture.read()[1].shape[1], 50)
+detector = mphand.Detector()
 
 webcam_win = cv2Window.Window('webcam_win',
                             ['L - H',
@@ -27,12 +30,12 @@ webcam_win = cv2Window.Window('webcam_win',
                             [39, 177, 0, 255, 255, 255])
 
 feild_win =  cv2Window.Window('feild_win',
-                                ['vector scale',
-                                'incremental value of noise',
-                                'noise octave',
-                                'Particles number',
-                                'feild strength force',
-                                'particels max speed'],
+                                ['scale',
+                                'inc',
+                                'oct',
+                                'no.Praticles',
+                                'force',
+                                'max.speed'],
                                 [(1, 70),
                                 (1, 100),
                                 (1, 24),
@@ -50,23 +53,29 @@ feild_win =  cv2Window.Window('feild_win',
                                  canvas.changeFeildStrengthForce,
                                  canvas.changeMaxspeed])
 
-
+def replace_background(frame, backgorund,lh,lv,ls,uh,uv,us):
+    hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
+    mask = cv2.inRange(hsv, (lh, ls, lv), (uh, us, uv))
+    res = cv2.bitwise_and(frame, frame, mask=mask)
+    f = frame-res
+    proj = np.where(f==0, backgorund, f)
+    return proj
 
 def main():
 
+    pretime = time.time()
     while True:
         canvas.update()
         ret, frame = capture.read()
+        print(detector.findFinger(frame))
 
-        hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
         lh,lv,ls,uh,uv,us = webcam_win.getAllTrackbarPos()
-        mask = cv2.inRange(hsv, (lh, ls, lv), (uh, us, uv))
-        res = cv2.bitwise_and(frame, frame, mask=mask)
-        f = frame-res
-
-        proj = np.where(f==0, canvas.canvas, f)
+        proj = replace_background(frame, canvas.canvas,lh,lv,ls,uh,uv,us)
         cv2.imshow('feild', canvas.canvas)
         cv2.imshow('webcam', proj)
+        cv2.imshow('hand', detector.drawHand(frame))
+
+        pretime = time.time()
 
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
