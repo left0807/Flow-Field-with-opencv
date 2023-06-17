@@ -22,12 +22,15 @@ class flowFeild():
         self.maxspeed = 5/(5+0.4)
         self.field = []
         self.particlesList = []
+        self.radius = 1
+        self.trijectory = 20
+        self.theme = 0
 
         for i in range(self.col*self.row):
             self.field.append(np.array([1, 0]))
 
         for i in range(self.numParticles):
-            self.particlesList.append(particles.Particles(width, height, scl, self.maxspeed))
+            self.particlesList.append(particles.Particles(width, height, scl, self.maxspeed, self.theme, self.radius))
     
     def changeScl(self, scl):
         if scl <= 10:
@@ -55,7 +58,7 @@ class flowFeild():
             self.particlesList = self.particlesList[0:numParticles]
         else:
             for _ in range(numParticles-self.numParticles):
-                self.particlesList.append(particles.Particles(self.width, self.height, self.scl, self.maxspeed))
+                self.particlesList.append(particles.Particles(self.width, self.height, self.scl, self.maxspeed, self.theme, self.radius))
 
         self.numParticles = numParticles
 
@@ -66,6 +69,21 @@ class flowFeild():
         for particle in self.particlesList:
             particle.maxspeed = maxspeed/(maxspeed+self.feildStrengthForce*10)
 
+    def changeRadius(self, radius):
+        if(radius == 0):
+            print("radius can't be zero")
+            return
+        self.radius = radius
+        for particle in self.particlesList:
+            particle.radius = radius
+
+    def changeTrajectory(self, trajectory):
+        self.trajectory = trajectory
+
+    def changeTheme(self, theme):
+        self.theme = theme
+        for particle in self.particlesList:
+            particle.setColour(theme)
     
     def drawVectors(self, x, y):
         id = y*self.col+x
@@ -75,18 +93,17 @@ class flowFeild():
         cv2.line(self.canvas, pt1.astype(int), pt2.astype(int), (255,255,255), 1)
 
     def update(self, hands = None):
-        self.canvas = cv2.addWeighted(self.canvas, 0.8, self.background, 1, 0)
+        self.canvas = cv2.addWeighted(self.canvas, (100-self.trijectory)/100, self.background, 1, 0)
         
         xoff = 1
         for x in range(self.row+1):
             yoff = 100
             for y in range(self.col+1):
-                deg = self.noise([xoff, yoff, self.zoff])*2*math.pi
+                deg = self.noise([xoff, yoff, self.zoff])
                 self.field[x+y*self.col] = np.array([self.feildStrengthForce*math.cos(deg), self.feildStrengthForce*math.sin(deg)])
                 #self.drawVectors(x, y)
                 yoff += self.inc
             xoff += self.inc
-
         self.zoff += self.inc
 
         for particle in self.particlesList:

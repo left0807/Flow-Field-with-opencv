@@ -3,17 +3,17 @@ import math
 import numpy as np
 import cv2
 
-star_colors = [
+colors = [[
     (255, 238, 0),
     (255, 250, 184),
     (255, 255, 255),
     (255, 250, 184),
     (255, 240, 199),
     (232, 132, 245)
-]
+]]
 
 class Particles():
-    def __init__(self, width, height, scl, maxspeed):
+    def __init__(self, width, height, scl, maxspeed, theme, radius):
         self.width = width
         self.height = height
         self.scl = scl
@@ -21,23 +21,28 @@ class Particles():
         self.prepos = self.pos.copy()
         self.vel = np.array([0.0, 0.0])
         self.maxspeed = maxspeed
-        self.color = star_colors[int(random()*len(star_colors))][::-1]
+        self.radius = radius
+        self.setColour(theme)
+
+    def setColour(self, theme):
+        self.color = colors[theme][int(random()*len(colors[theme]))][::-1]
 
     def update(self, force, canvas = None, hands = None, attractiveForceMag = None):   
         self.vel = (self.vel + force)*self.maxspeed
 
-        for hand, handpos in hands:
-            handpos = np.multiply(handpos, [self.height, self.width])
-            v = handpos - self.pos
-            v = v/(v**2).sum()**0.5
-            self.vel = (self.vel + hand*attractiveForceMag*v)*self.maxspeed
-            cv2.circle(canvas, handpos.astype(int), 10,  (255, 255, 255), 2)
+        if hands:
+            for hand, handpos in hands:
+                handpos = np.multiply(handpos, [self.height, self.width])
+                v = handpos - self.pos
+                v = v/(v**2).sum()**0.5
+                self.vel = (self.vel + hand*attractiveForceMag*v)*self.maxspeed
+                cv2.circle(canvas, handpos.astype(int), 10,  (255, 255, 255), 2)
 
         self.pos += self.vel
     
     def show(self, canvas):
         cv2.line(canvas, self.pos.astype(int), self.prepos.astype(int),
-                 self.color, 1)
+                 self.color, self.radius)
         self.edges()
         self.prepos = self.pos.copy()
 
