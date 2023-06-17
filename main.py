@@ -22,7 +22,9 @@ webcam_win = cv2Window.Window('webcam_win',
                             (0, 255),
                             (0, 255),
                             (0, 255)],
-                            new_win = True)
+                            new_win = True,
+                            default_value=
+                            [39, 177, 0, 255, 255, 255])
 
 feild_win =  cv2Window.Window('feild_win',
                                 ['vector scale',
