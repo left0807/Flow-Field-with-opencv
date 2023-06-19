@@ -81,18 +81,23 @@ def replace_background(frame, front, backgorund,lh,lv,ls,uh,uv,us):
 
 def main():
     pretime = time.time()
-    front = np.bitwise_not(np.zeros((width, height), dtype='uint8'))
+    front = np.bitwise_not(np.zeros((height, width, 3), dtype='uint8'))
 
     t = 0
+    hand = None
+
     while True:
         ret, frame = capture.read()
         frame = cv2.flip(frame, 1)
 
         if t%detectFreq == 0:
             detector.findFinger(frame)
+            hand = detector.getLandmarks(frame)
+            print(1/(time.time()-pretime))
 
         canvas.update(hands = detector.handpos)
-        lh,lv,ls,uh,uv,us = webcam_win.getAllTrackbarPos()
+        detector.drawHand(canvas.canvas, hand)
+        #lh,lv,ls,uh,uv,us = webcam_win.getAllTrackbarPos()
         #proj = replace_background(frame, front, canvas.canvas,lh,lv,ls,uh,uv,us)
         #cv2.putText(proj, str(int(1/(time.time()-pretime))), (100, 100), cv2.FONT_HERSHEY_PLAIN, 10, (255, 0, 0), 2)
 

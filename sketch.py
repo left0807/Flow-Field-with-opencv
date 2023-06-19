@@ -26,7 +26,7 @@ class flowFeild():
         self.radius = 1
         self.trijectory = 20
         self.theme = 0
-        self.curlAngle = math.pi/6
+        self.curlAngle = math.pi/3
 
         self.rotation_matrix = np.array([[math.cos(self.curlAngle), -math.sin(self.curlAngle)],
                                          [math.sin(self.curlAngle), math.cos(self.curlAngle)]])
