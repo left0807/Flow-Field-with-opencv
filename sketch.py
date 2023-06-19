@@ -2,29 +2,34 @@ import numpy as np
 import cv2
 import math
 import particles
+import mphand
 from perlin_noise import PerlinNoise
 
 class flowFeild():
     def __init__(self, width, height, scl):
-        self.canvas = np.zeros((width, height, 3), dtype = 'uint8')
-        self.background = np.zeros((width, height, 3), dtype = 'uint8')
+        self.canvas = np.zeros((height, width, 3), dtype = 'uint8')
+        self.background = np.zeros((height, width, 3), dtype = 'uint8')
         self.width = width
         self.height = height
         self.scl = scl
         self.col = width//scl
         self.row = height//scl
-        self.inc = 0.05
+        self.inc = 0.005
         self.noise = PerlinNoise()
         self.zoff = 0
-        self.numParticles = 3000
-        self.feildStrengthForce = 0.4
-        self.attractiveForceMag = 10
+        self.numParticles = 600
+        self.feildStrengthForceMag = 0.4
+        self.attractiveForceMag = 5
         self.maxspeed = 5/(5+0.4)
         self.field = []
         self.particlesList = []
         self.radius = 1
         self.trijectory = 20
         self.theme = 0
+        self.curlAngle = math.pi/6
+
+        self.rotation_matrix = np.array([[math.cos(self.curlAngle), -math.sin(self.curlAngle)],
+                                         [math.sin(self.curlAngle), math.cos(self.curlAngle)]])
 
         for i in range(self.col*self.row):
             self.field.append(np.array([1, 0]))
@@ -41,11 +46,11 @@ class flowFeild():
         self.col = self.width//scl
         self.row = self.height//scl
         self.field = []
-        for i in range(self.col*self.row):
+        for i in range((self.col+1)*(self.row+1)):
             self.field.append(np.array([1, 0]))
 
     def changeInc(self, inc):
-        self.inc = inc/100
+        self.inc = inc/1000
 
     def changeNoise(self, oct):
         if oct == 0:
@@ -94,23 +99,33 @@ class flowFeild():
 
     def update(self, hands = None):
         self.canvas = cv2.addWeighted(self.canvas, (100-self.trijectory)/100, self.background, 1, 0)
+        if hands:
+            for hand, handpos in hands:
+                cv2.circle(self.canvas, handpos.astype(int), 5, (255, 255, 255), 2)
         
-        xoff = 1
-        for x in range(self.row+1):
-            yoff = 100
-            for y in range(self.col+1):
-                deg = self.noise([xoff, yoff, self.zoff])
-                self.field[x+y*self.col] = np.array([self.feildStrengthForce*math.cos(deg), self.feildStrengthForce*math.sin(deg)])
+        yoff = 1
+        for y in range(self.row+1):
+            xoff = 100
+            for x in range(self.col+1):
+                deg = self.noise([xoff, yoff, self.zoff])*4*math.pi
+                self.field[y*self.col + x] = np.array([self.feildStrengthForce*math.cos(deg), self.feildStrengthForce*math.sin(deg)])
+
+                if hands:
+                    for hand, handpos in hands:
+                        attractiveForce = handpos - np.array([x*self.scl, y*self.scl])
+                        attractiveForce = self.attractiveForceMag*hand*attractiveForce/(attractiveForce**2).sum()**0.5
+                        self.field[x+y*self.col] = self.field[x+y*self.col] + np.matmul(self.rotation_matrix, attractiveForce)
+
                 #self.drawVectors(x, y)
-                yoff += self.inc
-            xoff += self.inc
+                xoff += self.inc
+            yoff += self.inc
         self.zoff += self.inc
 
         for particle in self.particlesList:
             x, y = particle.pos
-            x = int(x/self.scl)
-            y = int(y/self.scl)
-            particle.update(self.field[x+y*self.col], canvas = self.canvas, hands = hands, attractiveForceMag = self.attractiveForceMag)
+            x = math.floor(x/self.scl)
+            y = math.floor(y/self.scl)
+            particle.update(self.field[x+y*self.col])
             particle.show(self.canvas)
 
 

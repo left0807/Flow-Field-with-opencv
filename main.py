@@ -5,14 +5,15 @@ import cv2Window
 import mphand
 import time
 
-width = 720
-height = 1280
+width = 1280
+height = 720
 
 capture = cv2.VideoCapture(0)
-capture.set(cv2.CAP_PROP_FRAME_HEIGHT, width)
-capture.set(cv2.CAP_PROP_FRAME_WIDTH, height)
+capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 canvas = sketch.flowFeild(width, height, 100)
-detector = mphand.Detector()
+detector = mphand.Detector(width, height)
+detectFreq = 5
 
 webcam_win = cv2Window.Window('webcam_win',
                             ['L - H',
@@ -44,7 +45,7 @@ feild_win =  cv2Window.Window('feild_win',
                                 (0, 100)],
                                 new_win = True,
                                 default_value=
-                                [100, 5, 1, 3000, 50],
+                                [100, 5, 1, 600, 50],
                                 func_list =
                                 [canvas.changeScl,
                                  canvas.changeInc,
@@ -79,19 +80,29 @@ def replace_background(frame, front, backgorund,lh,lv,ls,uh,uv,us):
     return proj
 
 def main():
-
     pretime = time.time()
+    front = np.bitwise_not(np.zeros((width, height), dtype='uint8'))
+
+    t = 0
     while True:
         ret, frame = capture.read()
-        canvas.update(hands = detector.findFinger(frame))
-        front = np.bitwise_not(np.zeros(frame.shape, dtype='uint8'))
+        frame = cv2.flip(frame, 1)
 
+        if t%detectFreq == 0:
+            detector.findFinger(frame)
+
+        canvas.update(hands = detector.handpos)
         lh,lv,ls,uh,uv,us = webcam_win.getAllTrackbarPos()
-        cv2.imshow('feild', canvas.canvas)
-        cv2.imshow('webcam', replace_background(frame, front, canvas.canvas,lh,lv,ls,uh,uv,us))
+        #proj = replace_background(frame, front, canvas.canvas,lh,lv,ls,uh,uv,us)
+        #cv2.putText(proj, str(int(1/(time.time()-pretime))), (100, 100), cv2.FONT_HERSHEY_PLAIN, 10, (255, 0, 0), 2)
 
-        print(1/(time.time()-pretime))
+        cv2.imshow('feild', canvas.canvas)
+        #cv2.imshow('webcam', proj)
+
         pretime = time.time()
+        t = t+1
+    
+
 
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
