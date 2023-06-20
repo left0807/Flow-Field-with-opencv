@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 width = 1280
 height = 720
 
-canvas = sketch.flowFeild(width, height, 100, 5, 1, 600, 50, 50, 30,50, 1, 20, 0)
+canvas = sketch.flowFeild(width, height, 100, 5, 3, 600, 50, 50, 30,50, 1, 20, 0)
 capture = cv2.VideoCapture(0)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
@@ -50,7 +50,7 @@ feild_win =  cv2Window.Window('feild_win',
                                 (0, 360)],
                                 new_win = True,
                                 default_value=
-                                [100, 5, 1, 600, 50, 50, 30],
+                                [100, 5, 3, 600, 50, 50, 30],
                                 func_list =
                                 [canvas.changeScl,
                                  canvas.changeInc,

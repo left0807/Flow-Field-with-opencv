@@ -127,11 +127,10 @@ class flowFeild():
             for hand, handpos in hands:
                 cv2.circle(self.canvas, handpos.astype(int), 5, (255, 255, 255), 2)
         
-        yoff = 1
+        
         for y in range(self.row+1):
-            xoff = 100
             for x in range(self.col+1):
-                deg = self.noise([xoff, yoff, self.zoff])*4*math.pi
+                deg = self.noise([x*self.inc, y*self.inc, self.zoff])*4*math.pi
                 self.field[y*self.col + x] = np.array([self.feildStrengthForce*math.cos(deg), self.feildStrengthForce*math.sin(deg)])
 
                 if hands:
@@ -141,8 +140,6 @@ class flowFeild():
                         self.field[x+y*self.col] = self.field[x+y*self.col] + np.matmul(self.rotation_matrix, attractiveForce)
 
                 #self.drawVectors(x, y)
-                xoff += self.inc
-            yoff += self.inc
         self.zoff += self.inc
 
         for particle in self.particlesList:

@@ -43,7 +43,7 @@ class Detector():
                     x5 = lms[fingerPos[i][2]].x-lms[fingerPos[i][0]].x
                     y5 = lms[fingerPos[i][2]].y-lms[fingerPos[i][0]].y
 
-                    
+
                     if x1*x3 + y1*y3 > 0 and x1*x2 + y1*y2 >0 and x4*x5 + y4*y5 > 0:
                         rock = False
                     else:
