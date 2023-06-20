@@ -91,7 +91,7 @@ def main():
     front = np.bitwise_not(np.zeros((height, width, 3), dtype='uint8'))
     t = 0
     fps = []
-    
+
     pretime = time.time()
     hand = None
 
