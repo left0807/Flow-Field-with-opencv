@@ -1,5 +1,4 @@
 # Flow-Field-with-opencv
-![img1](img/pototype.gif)
 - Perlin Noise Flow Feild + Computer Vision == cool stuff
 ## Setup
 - type ```pip install requirements.txt``` in terminal

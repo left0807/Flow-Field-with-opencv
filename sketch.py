@@ -6,27 +6,43 @@ import mphand
 from perlin_noise import PerlinNoise
 
 class flowFeild():
-    def __init__(self, width, height, scl):
+    def __init__(self, 
+                 width, 
+                 height, 
+                 scl,
+                 inc,
+                 oct,
+                 numParticles,
+                 feildStrengthForceMag,
+                 attractiveForceMag,
+                 curlAngle,
+                 maxspeed,
+                 radius,
+                 trajectory,
+                 theme
+                 ):
         self.canvas = np.zeros((height, width, 3), dtype = 'uint8')
         self.background = np.zeros((height, width, 3), dtype = 'uint8')
         self.width = width
         self.height = height
+        
         self.scl = scl
         self.col = width//scl
         self.row = height//scl
-        self.inc = 0.005
-        self.noise = PerlinNoise()
+        self.inc = inc
+        self.noise = PerlinNoise(octaves=oct)
         self.zoff = 0
-        self.numParticles = 600
-        self.feildStrengthForceMag = 0.4
-        self.attractiveForceMag = 5
-        self.maxspeed = 5/(5+0.4)
+        self.numParticles = numParticles
+        self.feildStrengthForceMag = feildStrengthForceMag/100
+        self.attractiveForceMag = attractiveForceMag/100
+        self.curlAngle = curlAngle/180*math.pi
+
+        self.maxspeed = maxspeed/(maxspeed+self.feildStrengthForceMag)
         self.field = []
         self.particlesList = []
-        self.radius = 1
-        self.trijectory = 20
-        self.theme = 0
-        self.curlAngle = math.pi/3
+        self.radius = radius
+        self.trajectory = trajectory
+        self.theme = theme
 
         self.rotation_matrix = np.array([[math.cos(self.curlAngle), -math.sin(self.curlAngle)],
                                          [math.sin(self.curlAngle), math.cos(self.curlAngle)]])
@@ -89,7 +105,15 @@ class flowFeild():
         self.theme = theme
         for particle in self.particlesList:
             particle.setColour(theme)
-    
+
+    def changeattractiveForceMag(self, attractiveForceMag):
+        self.attractiveForceMag = attractiveForceMag/10
+
+    def changecurlAngle(self, curlAngle):
+        self.curlAngle = curlAngle/180*math.pi
+        self.rotation_matrix = np.array([[math.cos(self.curlAngle), -math.sin(self.curlAngle)],
+                                         [math.sin(self.curlAngle), math.cos(self.curlAngle)]])
+
     def drawVectors(self, x, y):
         id = y*self.col+x
         pt1 = np.array([x*self.scl, y*self.scl])
@@ -98,7 +122,7 @@ class flowFeild():
         cv2.line(self.canvas, pt1.astype(int), pt2.astype(int), (255,255,255), 1)
 
     def update(self, hands = None):
-        self.canvas = cv2.addWeighted(self.canvas, (100-self.trijectory)/100, self.background, 1, 0)
+        self.canvas = cv2.addWeighted(self.canvas, (100-self.trajectory)/100, self.background, 1, 0)
         if hands:
             for hand, handpos in hands:
                 cv2.circle(self.canvas, handpos.astype(int), 5, (255, 255, 255), 2)

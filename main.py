@@ -8,10 +8,10 @@ import time
 width = 1280
 height = 720
 
+canvas = sketch.flowFeild(width, height, 100, 5, 1, 600, 50, 50, 30,50, 1, 20, 0)
 capture = cv2.VideoCapture(0)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-canvas = sketch.flowFeild(width, height, 100)
 detector = mphand.Detector(width, height)
 detectFreq = 5
 
@@ -37,21 +37,27 @@ feild_win =  cv2Window.Window('feild_win',
                                 'inc',
                                 'oct',
                                 'no.Praticles',
-                                'force'],
-                                [(1, 200),
+                                'field force',
+                                'HandForce',
+                                'CurlAngle'],
+                                [(1, height),
                                 (1, 100),
                                 (1, 24),
                                 (0, 6000),
-                                (0, 100)],
+                                (0, 100),
+                                (0, 100),
+                                (0, 360)],
                                 new_win = True,
                                 default_value=
-                                [100, 5, 1, 600, 50],
+                                [100, 5, 1, 600, 50, 50, 30],
                                 func_list =
                                 [canvas.changeScl,
                                  canvas.changeInc,
                                  canvas.changeNoise,
                                  canvas.changeNumParticles,
-                                 canvas.changeFeildStrengthForce])
+                                 canvas.changeFeildStrengthForce,
+                                 canvas.changeattractiveForceMag,
+                                 canvas.changecurlAngle])
 
 particle_win = cv2Window.Window('particle_win',
                                 ['max.speed',
@@ -93,22 +99,16 @@ def main():
         if t%detectFreq == 0:
             detector.findFinger(frame)
             hand = detector.getLandmarks(frame)
-            print(1/(time.time()-pretime))
+            print(detectFreq/(time.time()-pretime))
+            pretime = time.time()
+
 
         canvas.update(hands = detector.handpos)
         detector.drawHand(canvas.canvas, hand)
-        #lh,lv,ls,uh,uv,us = webcam_win.getAllTrackbarPos()
-        #proj = replace_background(frame, front, canvas.canvas,lh,lv,ls,uh,uv,us)
-        #cv2.putText(proj, str(int(1/(time.time()-pretime))), (100, 100), cv2.FONT_HERSHEY_PLAIN, 10, (255, 0, 0), 2)
 
         cv2.imshow('feild', canvas.canvas)
-        #cv2.imshow('webcam', proj)
 
-        pretime = time.time()
         t = t+1
-    
-
-
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
