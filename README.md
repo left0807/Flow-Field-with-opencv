@@ -9,13 +9,13 @@
 
 - press 'q' to quit / crt + c in terminal
 ## Play with the attributes
-![img2](img/particle_win.png)
+![img2](assets/img/particle_win.png)
 - maximum speed of the particles
 - radius of particels
 - trajectory - useless
 - theme - future feature
 
-![img3](img/field_win.png)
+![img3](assets/img/field_win.png)
 - scale of each vecto
     - Low scale may result in low FPS
 - incremental value of perlin noise
