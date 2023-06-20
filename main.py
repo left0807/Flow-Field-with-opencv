@@ -4,6 +4,7 @@ import sketch
 import cv2Window
 import mphand
 import time
+import matplotlib.pyplot as plt
 
 width = 1280
 height = 720
@@ -67,7 +68,7 @@ particle_win = cv2Window.Window('particle_win',
                                  [(0, 500),
                                   (1, 5),
                                   (0, 100),
-                                  (0, 0)],
+                                  (0, 2)],
                                   new_win = True,
                                   default_value=
                                   [50, 1, 20, 0],
@@ -86,10 +87,12 @@ def replace_background(frame, front, backgorund,lh,lv,ls,uh,uv,us):
     return proj
 
 def main():
-    pretime = time.time()
+    
     front = np.bitwise_not(np.zeros((height, width, 3), dtype='uint8'))
-
     t = 0
+    fps = []
+    
+    pretime = time.time()
     hand = None
 
     while True:
@@ -97,11 +100,8 @@ def main():
         frame = cv2.flip(frame, 1)
 
         if t%detectFreq == 0:
-            detector.findFinger(frame)
             hand = detector.getLandmarks(frame)
-            print(detectFreq/(time.time()-pretime))
-            pretime = time.time()
-
+            detector.findFinger(frame, hand)
 
         canvas.update(hands = detector.handpos)
         detector.drawHand(canvas.canvas, hand)
@@ -109,9 +109,15 @@ def main():
         cv2.imshow('feild', canvas.canvas)
 
         t = t+1
+        fps.append(1/(time.time()-pretime))
+        pretime = time.time()
+
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+    plt.plot(np.array(fps))
+    plt.show()
 
 
 if __name__ == '__main__':

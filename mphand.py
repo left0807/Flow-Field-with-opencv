@@ -11,18 +11,18 @@ fingerPos = [[2,3,4],
 class Detector():
     def __init__(self, width, height):
         self.mpHands = mp.solutions.hands
-        self.hands = self.mpHands.Hands(max_num_hands = 4, min_detection_confidence = 0.2)
+        self.hands = self.mpHands.Hands()
         self.mpDraw = mp.solutions.drawing_utils
         self.width = width
         self.height = height
+        self.handpos = []
 
     def getLandmarks(self, frame):
         imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result = self.hands.process(imgRGB)
         return result.multi_hand_landmarks
     
-    def findFinger(self, frame):
-        result = self.getLandmarks(frame)
+    def findFinger(self, frame, result):
         self.handpos = []
 
         if result:
@@ -42,9 +42,8 @@ class Detector():
                     y4 = lms[fingerPos[i][0]].y-lms[0].y
                     x5 = lms[fingerPos[i][2]].x-lms[fingerPos[i][0]].x
                     y5 = lms[fingerPos[i][2]].y-lms[fingerPos[i][0]].y
-
                     
-                    if x1*x3 + y1*y3 > 0 and x1*x2 + y1*y2 > 0 and x4*x5 + y4*y5 > 0:
+                    if x1*x3 + y1*y3 > 0 and x4*x5 + y4*y5 > 0:
                         rock = False
                     else:
                         paper = False
